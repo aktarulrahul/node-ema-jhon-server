@@ -37,8 +37,24 @@ async function mongodbCURD() {
     ------------------------------------- */
     app.get('/products', async (req, res) => {
       const cursor = productCollection.find({});
-      const products = await cursor.toArray();
-      res.send(products);
+      const count = await cursor.count();
+      console.log(req.query);
+      const page = req.query.page;
+      const size = parseInt(req.query.size);
+      let products;
+      if (page) {
+        products = await cursor
+          .skip(page * size)
+          .limit(size)
+          .toArray();
+      } else {
+        products = await cursor.toArray();
+      }
+
+      res.send({
+        count,
+        products,
+      });
     });
   } finally {
     // await client.close();
