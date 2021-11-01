@@ -26,7 +26,7 @@ async function mongodbCURD() {
      checking connection with DB
     ------------------------------------- */
     await client.connect();
-    console.log('db connected');
+    // console.log('db connected');
     /* ------------------------------------- 
     database name and collection init
     ------------------------------------- */
@@ -62,7 +62,7 @@ async function mongodbCURD() {
     ------------------------------------- */
     app.post('/products/bykeys', async (req, res) => {
       const keys = req.body;
-      console.log(keys);
+      // console.log(keys);
       const query = { key: { $in: keys } };
       const products = await productCollection.find(query).toArray();
       res.json(products);
@@ -72,8 +72,23 @@ async function mongodbCURD() {
     ------------------------------------- */
     app.post('/orders', async (req, res) => {
       const order = req.body;
+      order.createdAt = new Date();
       const result = await orderCollection.insertOne(order);
       res.json(result);
+    });
+
+    /* ------------------------------------- 
+    GET all orders of an individual user API
+    ------------------------------------- */
+    app.get('/orders', async (req, res) => {
+      let query = {};
+      const email = req.query.email;
+      if (email) {
+        query = { email: email };
+      }
+      const cursor = orderCollection.find(query);
+      const orders = await cursor.toArray();
+      res.json(orders);
     });
 
     /* ------------------------------------- 
